@@ -71,14 +71,18 @@ const run = async () => {
 		});
 
 		app.get("/poems/:id", async (req, res) => {
-			const _id = new ObjectId(req.params.id);
-			const result = await poemsColl.findOne({ _id });
-			res.send(result);
+			try {
+				const _id = new ObjectId(req.params.id);
+				const result = await poemsColl.findOne({ _id });
+				res.send(result);
+			} catch (error) {
+				res.send(null);
+			}
 		});
 
 		app.get("/poems/user/:uid", verifyToken, async (req, res) => {
 			const { uid } = req.params;
-			const result = await poemsColl.find({ uid }).toArray();
+			const result = await poemsColl.find({ writtenBy: uid }).toArray();
 			res.send(result);
 		});
 
