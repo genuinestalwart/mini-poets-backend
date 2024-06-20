@@ -20,7 +20,7 @@ const client = new MongoClient(uri, {
 });
 
 app.get("/", (req, res) => {
-	res.redirect("http://localhost:5173/");
+	res.redirect("https://mini-poets.web.app/");
 });
 
 const run = async () => {
@@ -63,10 +63,22 @@ const run = async () => {
 			res.send(result);
 		});
 
+		app.get("/author/:uid", verifyToken, async (req, res) => {
+			const { uid } = req.params;
+			const result = await usersColl.findOne({ uid });
+			res.send(result);
+		});
+
 		//
 
 		app.get("/poems", async (req, res) => {
-			const result = await poemsColl.find().toArray();
+			const { search } = req.query;
+
+			const query = search
+				? { title: { $regex: search, $options: "i" } }
+				: {};
+
+			const result = await poemsColl.find(query).toArray();
 			res.send(result);
 		});
 
@@ -80,7 +92,7 @@ const run = async () => {
 			}
 		});
 
-		app.get("/poems/user/:uid", verifyToken, async (req, res) => {
+		app.get("/my-poems/:uid", verifyToken, async (req, res) => {
 			const { uid } = req.params;
 			const result = await poemsColl.find({ writtenBy: uid }).toArray();
 			res.send(result);
